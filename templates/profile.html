@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+    {{ title }}
+
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+
+    <main class="container mt-3">
+    <div class="card my-4 mx-auto">
+        <div class="card-body m-2 m-md-4">
+            <article class="row">
+                <div class="col-5"><img src="{{ photo }}" class="img-fluid" alt=""></div>
+                <div class="col-7">
+                    <section class="teacher=info">
+                        <h1 class="h2">{{ name }}</h1>
+                        <p><span class="badge badge-secondary mr-2">Для путешествий </span>Рейтинг: {{ rating }}
+                            Ставка: {{ price }} / час</p>
+                        <p>{{ about }}</p>
+                    </section>
+                    <section class="available">
+                        <h4 class="mb-4 mt-5">Записаться на пробный урок</h4>
+                        {% for j in teachers %}
+                            {% if j['id'] == id %}
+                                {% for k, v in j['free'].items() %}
+                                    {% if k == 'mon' %}
+                                        {% set k = 'Понедельник' %}
+                                    {% elif k == 'tue' %}
+                                        {% set k = 'Вторник' %}
+                                    {% elif k == 'wed' %}
+                                        {% set k = 'Среда' %}
+                                    {% elif k == 'thu' %}
+                                        {% set k = 'Четверг' %}
+                                    {% elif k == 'fri' %}
+                                        {% set k = 'Пятница' %}
+                                    {% elif k == 'sat' %}
+                                        {% set k = 'Суббота' %}
+                                    {% elif k == 'sun' %}
+                                        {% set k = 'Воскресенье' %}
+                                    {% endif %}
+                                    <h6 class="mt-4">{{ k }}</h6>
+                                    {% for t, f in v.items() %}
+                                        {% if f == True %}
+                                            {% set count = 1 %}
+                                            <a href="{{ url_for('booking', t_id=id, day=k, time=t) }}"
+                                               class="btn btn-outline-success mr-2">{{ t }} свободно</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not True in v.values() %}
+                                        <p> Нет свободных часов</p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </section>
+                </div>
+            </article>
+        </div>
+    </div>
+{% endblock %}
+{% block footer %}{% endblock %}
