@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+    {{ title }}
+
+{% endblock %}
+
+{% block content_title %}
+
+    <main class="container mt-5">
+    <div class="col-12 col-sm-10 col-lg-6 offset-lg-3 offset-sm-1">
+        <form action="{{ url_for('request_done') }}" class="card mb-5" method="POST">
+            <div class="card-body text-center pt-5">
+                <h1 class="h3 card-title mt-4 mb-2">Подбор преподавателя</h1>
+                <p class="px-5">Напишите, чего вам нужно и&nbsp;мы&nbsp;подберем отличных&nbsp;ребят</p>
+            </div>
+            <hr>
+            <div class="card-body mx-3">
+                <div class="row">
+                    <div class="col">
+                        {{ form.csrf_token }}
+                        {{ form.target.label }}
+                        {{ form.target(class_='form-check-input') }}
+                    </div>
+                    <div class="col">
+                        {{ form.times.label }}
+                        {{ form.times(class_='form-check-input') }}
+                    </div>
+                </div>
+                <br><br><br><br>
+            </div>
+            <div class="card-body mx-3">
+                <hr>
+                {{ form.target_name.label }}
+                {{ form.target_name(class_='form-control') }}
+                {{ form.target_phone.label }}
+                {{ form.target_phone(class_='form-control') }}
+                <input type="submit" class="btn btn-primary mt-4 mb-2" value="Найдите мне преподавателя">
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

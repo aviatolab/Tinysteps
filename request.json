@@ -1,0 +1,14 @@
+[
+    {
+        "target": "study",
+        "times": "3-5 часов в неделю",
+        "name": "piopiopipo",
+        "phone": "8909009"
+    },
+    {
+        "target": "travel",
+        "times": null,
+        "name": "Эдуард",
+        "phone": "223 322"
+    }
+]
