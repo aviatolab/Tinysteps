@@ -162,5 +162,12 @@ def goal():
                            teachers=sort_teacher_for_rating[::-1])
 
 
+@app.route('/coding/')
+def coding():
+    sort_teacher_for_rating = sorted(teacher, key=lambda k: k['rating'])
+    return render_template('coding.html',
+                           teachers=sort_teacher_for_rating[::-1])
+
+
 if __name__ == '__main__':
     app.run()
