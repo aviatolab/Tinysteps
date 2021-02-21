@@ -3,10 +3,33 @@ import json
 import random
 from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField
-from collections import OrderedDict
+from flask_sqlalchemy import SQLAlchemy
+
 
 app = Flask(__name__)
 app.secret_key = 'papa_u_vasi_silen_v_matematike'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tinysteps.db'
+db = SQLAlchemy(app)
+
+
+class Teachers(db.Model):
+    __tablename__ = "teachers"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    about = db.Column(db.Text)
+    rating = db.Column(db.Float)
+    picture = db.Column(db.String(300))
+    price = db.Column(db.Integer)
+    goals = db.relationship("Goals", back_populates="teacher")
+
+
+class Goals(db.Model):
+    __tablename__ = "goals"
+    id = db.Column(db.Integer, primary_key=True)
+    goal = db.Column(db.String(100), nullable=False)
+    teacher = db.relationship("Teachers", back_populates="goals")
+    teachers_id = db.Column(db.Integer, db.ForeignKey("teachers.id"))
 
 
 class BookingForm(FlaskForm):
