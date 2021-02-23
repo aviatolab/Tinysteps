@@ -4,6 +4,7 @@ import random
 from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.secret_key = 'papa_u_vasi_silen_v_matematike'
@@ -11,6 +12,7 @@ app.secret_key = 'papa_u_vasi_silen_v_matematike'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite_001.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Teachers(db.Model):
@@ -111,7 +113,6 @@ def request_done():
 
 @app.route('/profile/<teacher_id>')
 def profile(teacher_id):
-    day = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     teacher_photo = ''
     teacher_name = ''
     goald = ''
@@ -120,9 +121,11 @@ def profile(teacher_id):
     price = 0
     about = ''
     free = {}
+    flag = 0
 
     for i in teacher:
         if i.id == int(teacher_id):
+            flag = 1
             teacher_photo = i.picture
             teacher_name = i.name
             teacher_goal = i.goals.split()
@@ -137,16 +140,19 @@ def profile(teacher_id):
             if k == i:
                 goald += v + ' '
 
-    return render_template('profile.html',
-                           photo=teacher_photo,
-                           name=teacher_name,
-                           goal=goald,
-                           rating=rating,
-                           price=price,
-                           about=about,
-                           teachers=teacher,
-                           id=teacher_id,
-                           free=free)
+    if flag == 0:
+        return render_template('404.html')
+    else:
+        return render_template('profile.html',
+                               photo=teacher_photo,
+                               name=teacher_name,
+                               goal=goald,
+                               rating=rating,
+                               price=price,
+                               about=about,
+                               teachers=teacher,
+                               id=teacher_id,
+                               free=free)
 
 
 @app.route('/booking/<t_id>/<day>/<time>')
@@ -188,17 +194,22 @@ def booking_done(b_day, b_time, t_name, t_id):
 
 @app.route('/goal/')
 def goal():
-    sort_teacher_for_rating = sorted(teacher, key=lambda k: k['rating'])
+    sort_teacher_for_rating = sorted(teacher, key=lambda k: k.rating)
     return render_template('goal.html',
                            teachers=sort_teacher_for_rating[::-1])
 
 
 @app.route('/coding/')
 def coding():
-    sort_teacher_for_rating = sorted(teacher, key=lambda k: k['rating'])
+    sort_teacher_for_rating = sorted(teacher, key=lambda k: k.rating)
     return render_template('coding.html',
                            teachers=sort_teacher_for_rating[::-1])
 
 
+@app.errorhandler(404)
+def not_found():
+    return render_template('404.html')
+
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

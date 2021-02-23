@@ -30,12 +30,12 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-3"><img src="{{ i['picture'] }}" class="img-fluid" alt=""></div>
+                        <div class="col-3"><img src="{{ i.picture }}" class="img-fluid" alt=""></div>
                         <div class="col-9">
-                            <p class="float-right">Рейтинг: {{ i['rating'] }} Ставка: {{ i['price'] }} / час</p>
-                            <h2 class="h4">{{ i['name'] }}</h2>
-                            <p>{{ i['about'] | truncate(300) }}</p>
-                            <a href="{{ url_for('profile', teacher_id=i['id']) }}" class="btn btn-outline-primary btn-sm mr-3 mb-2">Показать информацию и
+                            <p class="float-right">Рейтинг: {{ i.rating }} Ставка: {{ i.price }} / час</p>
+                            <h2 class="h4">{{ i.name }}</h2>
+                            <p>{{ i.about | truncate(300) }}</p>
+                            <a href="{{ url_for('profile', teacher_id=i.id) }}" class="btn btn-outline-primary btn-sm mr-3 mb-2">Показать информацию и
                                 расписание</a>
                         </div>
                     </div>
