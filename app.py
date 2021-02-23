@@ -5,11 +5,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField
 from flask_sqlalchemy import SQLAlchemy
 
-
 app = Flask(__name__)
 app.secret_key = 'papa_u_vasi_silen_v_matematike'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tinysteps.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite_001.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
@@ -21,15 +21,29 @@ class Teachers(db.Model):
     rating = db.Column(db.Float)
     picture = db.Column(db.String(300))
     price = db.Column(db.Integer)
-    goals = db.relationship("Goals", back_populates="teacher")
+    free = db.Column(db.String(1000), nullable=False)
+    goals = db.Column(db.String(100))
+    booking = db.relationship("Booking", back_populates="teacher_b")
 
 
-class Goals(db.Model):
-    __tablename__ = "goals"
+class Booking(db.Model):
+    __tablename__ = "bookings"
     id = db.Column(db.Integer, primary_key=True)
-    goal = db.Column(db.String(100), nullable=False)
-    teacher = db.relationship("Teachers", back_populates="goals")
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.String(100), nullable=False)
+    time = db.Column(db.String(100), nullable=False)
+    teacher_b = db.relationship("Teachers", back_populates="booking")
     teachers_id = db.Column(db.Integer, db.ForeignKey("teachers.id"))
+
+
+class RequestView(db.Model):
+    __tablename__ = "requestviews"
+    id = db.Column(db.Integer, primary_key=True)
+    target = db.Column(db.String(100), nullable=False)
+    times = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(100), nullable=False)
 
 
 class BookingForm(FlaskForm):
@@ -50,8 +64,7 @@ class RequestForm(FlaskForm):
     target_phone = StringField('Ваш телефон:')
 
 
-with open("teachers.json", "r", encoding='utf-8') as f:
-    teacher = json.load(f)
+teacher = db.session.query(Teachers).all()
 
 with open("goals.json", "r", encoding='utf-8') as g:
     js_goal = json.load(g)
@@ -101,39 +114,39 @@ def profile(teacher_id):
     day = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     teacher_photo = ''
     teacher_name = ''
-    about = ''
-    rating = 0
+    goald = ''
+    teacher_goal = []
+    rating = 0.0
     price = 0
-    count = 0
-    profile_goals = []
-    goald = ""
+    about = ''
+    free = {}
 
     for i in teacher:
-        if i['id'] == int(teacher_id):
-            teacher_photo = i['picture']
-            teacher_name = i['name']
-            about = i['about']
-            rating = i['rating']
-            price = i['price']
-            profile_goals = i['goals'].copy()
+        if i.id == int(teacher_id):
+            teacher_photo = i.picture
+            teacher_name = i.name
+            teacher_goal = i.goals.split()
+            rating = i.rating
+            price = i.price
+            about = i.about
+            free = json.loads(i.free)
             break
 
     for k, v in js_goal.items():
-        for i in profile_goals:
+        for i in teacher_goal:
             if k == i:
                 goald += v + ' '
 
     return render_template('profile.html',
-                           day=day,
-                           teachers=teacher,
                            photo=teacher_photo,
                            name=teacher_name,
-                           about=about,
+                           goal=goald,
                            rating=rating,
                            price=price,
-                           id=int(teacher_id),
-                           count=count,
-                           goalz=goald)
+                           about=about,
+                           teachers=teacher,
+                           id=teacher_id,
+                           free=free)
 
 
 @app.route('/booking/<t_id>/<day>/<time>')
@@ -142,9 +155,9 @@ def booking(t_id, day, time):
     photo = ''
     name = ''
     for i in teacher:
-        if i['id'] == int(t_id):
-            photo = i['picture']
-            name = i['name']
+        if i.id == int(t_id):
+            photo = i.picture
+            name = i.name
             break
     return render_template('booking.html',
                            t_id=t_id,
@@ -155,21 +168,16 @@ def booking(t_id, day, time):
                            form=form)
 
 
-@app.route('/booking_done/<b_day>/<b_time>/<t_name>', methods=['POST', 'GET'])
-def booking_done(b_day, b_time, t_name):
+@app.route('/booking_done/<b_day>/<b_time>/<t_name>/<t_id>', methods=['POST', 'GET'])
+def booking_done(b_day, b_time, t_name, t_id):
     form = BookingForm()
     name = form.name.data
     phone = form.phone.data
     if request.method == 'POST':
-        book = {'name': name, 'phone': phone, 'teacher': t_name, 'date': b_day, 'time': b_time}
-
-        with open('booking.json') as file:
-            list_booking = json.load(file)
-
-        list_booking.append(book)
-
-        with open('booking.json', 'w', encoding='utf-8') as file:
-            json.dump(list_booking, file, indent=4, ensure_ascii=False)
+        b_teacher = Teachers.query.get(t_id)
+        bookings = Booking(name=name, phone=phone, date=b_day, time=b_time, teacher_b=b_teacher)
+        db.session.add(bookings)
+        db.session.commit()
 
     return render_template('booking_done.html',
                            day=b_day,
